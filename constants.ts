@@ -44,4 +44,4 @@ export const LEVELS = [
  * 3. Implementar > Nueva implementación > Aplicación Web.
  * 4. Copia la "URL de la aplicación web" y pégala aquí abajo.
  */
-export const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
+export const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0UevcatM1C9v_JAtvk33oAA6rHJhRbM_AOMnxad58mkU6g-WpT9O8WeYbt_01EsMZYg/exec";
