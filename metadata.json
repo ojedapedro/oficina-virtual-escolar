@@ -1,0 +1,5 @@
+{
+  "name": "Oficina Virtual Escolar",
+  "description": "Aplicación de registro de pagos escolares para representantes, con soporte para múltiples niveles educativos y métodos de pago, integrada con Google Sheets.",
+  "requestFramePermissions": []
+}
