@@ -1,55 +1,66 @@
 
 /**
- * INSTRUCCIONES:
- * 1. Abra su Google Sheet (ID: 17slRl7f9AKQgCEGF5jDLMGfmOc-unp1gXSRpYFGX1Eg)
- * 2. Vaya a Extensiones > Apps Script
- * 3. Reemplace el código por este nuevo contenido.
- * 4. Cree una hoja llamada "Usuarios" con dos columnas: "Cedula" y "Clave".
- * 5. Implemente como Aplicación Web (Acceso: Cualquiera).
+ * CONFIGURACIÓN INICIAL
+ * ID del documento: 17slRl7f9AKQgCEGF5jDLMGfmOc-unp1gXSRpYFGX1Eg
  */
 
-function doGet(e) {
-  const sheetId = "17slRl7f9AKQgCEGF5jDLMGfmOc-unp1gXSRpYFGX1Eg";
-  const action = e.parameter.action;
+const SHEET_ID = "17slRl7f9AKQgCEGF5jDLMGfmOc-unp1gXSRpYFGX1Eg";
 
-  // Acción de Login
+/**
+ * Función para crear la estructura inicial de la base de datos
+ */
+function setupAppStructure() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  
+  // 1. Hoja de Pagos
+  let pagosSheet = ss.getSheetByName("Pagos") || ss.insertSheet("Pagos");
+  pagosSheet.clear();
+  const pagosHeaders = ["Timestamp", "Fecha Registro", "Fecha Pago", "Cedula Representante", "Nivel", "Matricula", "Tipo Pago", "Referencia", "Monto", "Observaciones"];
+  pagosSheet.appendRow(pagosHeaders);
+  pagosSheet.getRange(1, 1, 1, pagosHeaders.length).setFontWeight("bold").setBackground("#d9ead3");
+  
+  // 2. Hoja de Usuarios (Actualizada con Nombre y Matricula)
+  let usuariosSheet = ss.getSheetByName("Usuarios") || ss.insertSheet("Usuarios");
+  usuariosSheet.clear();
+  const usuariosHeaders = ["Cedula", "Clave", "Nombre", "Matricula"];
+  usuariosSheet.appendRow(usuariosHeaders);
+  usuariosSheet.getRange(1, 1, 1, usuariosHeaders.length).setFontWeight("bold").setBackground("#cfe2f3");
+  
+  // Usuario de prueba
+  usuariosSheet.appendRow(["V-12345678", "1234", "Usuario de Prueba", "AD-2025-001"]);
+  
+  return "Estructura actualizada exitosamente.";
+}
+
+function doGet(e) {
+  const action = e.parameter.action;
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+
   if (action === 'login') {
     const user = e.parameter.user;
     const pass = e.parameter.pass;
     try {
-      const ss = SpreadsheetApp.openById(sheetId);
-      const userSheet = ss.getSheetByName("Usuarios") || ss.insertSheet("Usuarios");
-      if (userSheet.getLastRow() < 1) {
-        return ContentService.createTextOutput(JSON.stringify({ result: "error", message: "No hay usuarios registrados por el administrador" }))
-          .setMimeType(ContentService.MimeType.JSON);
-      }
-      
+      const userSheet = ss.getSheetByName("Usuarios");
       const data = userSheet.getDataRange().getValues();
-      const found = data.find(row => row[0].toString().trim() === user.trim() && row[1].toString().trim() === pass.trim());
+      const found = data.slice(1).find(row => 
+        row[0].toString().trim().toLowerCase() === user.trim().toLowerCase() && 
+        row[1].toString().trim() === pass.trim()
+      );
       
       if (found) {
-        return ContentService.createTextOutput(JSON.stringify({ result: "success", user: user }))
-          .setMimeType(ContentService.MimeType.JSON);
+        return createJsonResponse({ result: "success", user: user, nombre: found[2] });
       } else {
-        return ContentService.createTextOutput(JSON.stringify({ result: "error", message: "Cédula o clave incorrecta" }))
-          .setMimeType(ContentService.MimeType.JSON);
+        return createJsonResponse({ result: "error", message: "Cédula o clave incorrecta" });
       }
     } catch (err) {
-      return ContentService.createTextOutput(JSON.stringify({ result: "error", message: err.toString() }))
-        .setMimeType(ContentService.MimeType.JSON);
+      return createJsonResponse({ result: "error", message: err.toString() });
     }
   }
 
-  // Acción de Leer Historial
   if (action === 'read') {
     try {
-      const ss = SpreadsheetApp.openById(sheetId);
       const sheet = ss.getSheetByName("Pagos");
-      if (!sheet || sheet.getLastRow() < 2) {
-        return ContentService.createTextOutput(JSON.stringify([]))
-          .setMimeType(ContentService.MimeType.JSON);
-      }
-      
+      if (!sheet || sheet.getLastRow() < 2) return createJsonResponse([]);
       const data = sheet.getDataRange().getValues();
       const headers = data[0];
       const rows = data.slice(1).map(row => {
@@ -60,35 +71,47 @@ function doGet(e) {
         });
         return obj;
       });
-      
-      return ContentService.createTextOutput(JSON.stringify(rows.reverse()))
-        .setMimeType(ContentService.MimeType.JSON);
+      return createJsonResponse(rows.reverse());
     } catch (err) {
-      return ContentService.createTextOutput(JSON.stringify({ error: err.toString() }))
-        .setMimeType(ContentService.MimeType.JSON);
+      return createJsonResponse({ error: err.toString() });
     }
   }
-  
   return ContentService.createTextOutput("Servicio Activo").setMimeType(ContentService.MimeType.TEXT);
 }
 
 function doPost(e) {
   try {
-    const sheetId = "17slRl7f9AKQgCEGF5jDLMGfmOc-unp1gXSRpYFGX1Eg";
-    const ss = SpreadsheetApp.openById(sheetId);
-    const sheet = ss.getSheetByName("Pagos") || ss.insertSheet("Pagos");
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    const data = JSON.parse(e.postData.contents);
     
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(["Timestamp", "Fecha Registro", "Fecha Pago", "Cedula Representante", "Nivel", "Matricula", "Tipo Pago", "Referencia", "Monto", "Observaciones"]);
+    // Lógica de Registro de Usuario
+    if (data.action === 'register') {
+      const sheet = ss.getSheetByName("Usuarios");
+      const usersData = sheet.getDataRange().getValues();
+      const exists = usersData.some(row => row[0].toString().trim().toLowerCase() === data.cedula.trim().toLowerCase());
+      
+      if (exists) {
+        return createJsonResponse({ result: "error", message: "La cédula ya se encuentra registrada." });
+      }
+      
+      sheet.appendRow([data.cedula, data.clave, data.nombre, data.matricula]);
+      return createJsonResponse({ result: "success", message: "Usuario registrado con éxito." });
     }
     
-    const data = JSON.parse(e.postData.contents);
-    sheet.appendRow([new Date(), data.fechaRegistro, data.fechaPago, data.cedula, data.nivel, data.matricula || "N/A", data.tipoPago, data.referencia || "N/A", data.monto || 0, data.observaciones || ""]);
+    // Lógica de Registro de Pago (Default)
+    const sheet = ss.getSheetByName("Pagos");
+    sheet.appendRow([
+      new Date(), data.fechaRegistro, data.fechaPago, data.cedula, 
+      data.nivel, data.matricula || "N/A", data.tipoPago, 
+      data.referencia || "N/A", data.monto || 0, data.observaciones || ""
+    ]);
     
-    return ContentService.createTextOutput(JSON.stringify({ "result": "success" }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return createJsonResponse({ result: "success" });
   } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({ "result": "error", "error": error.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return createJsonResponse({ result: "error", error: error.toString() });
   }
+}
+
+function createJsonResponse(data) {
+  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
 }

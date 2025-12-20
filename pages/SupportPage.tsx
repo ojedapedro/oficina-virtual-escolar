@@ -5,7 +5,7 @@ import { Bot, Send, User, Loader2 } from 'lucide-react';
 
 const SupportPage: React.FC = () => {
   const [messages, setMessages] = useState<{ role: 'user' | 'bot'; text: string }[]>([
-    { role: 'bot', text: '¡Hola! Soy tu asistente de la Oficina Virtual. ¿Tienes dudas sobre cómo registrar un pago o cuáles son los niveles educativos?' }
+    { role: 'bot', text: '¡Hola! Soy tu asistente de la Oficina Virtual del Maestro Beltrán Prieto Figueroa. ¿En qué puedo ayudarte hoy?' }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -31,13 +31,13 @@ const SupportPage: React.FC = () => {
         model: 'gemini-3-flash-preview',
         contents: userMsg,
         config: {
-          systemInstruction: `Eres un asistente amable de la Oficina Virtual del Colegio San José. 
+          systemInstruction: `Eres un asistente amable de la Oficina Virtual del Colegio Maestro Beltrán Prieto Figueroa. 
           Ayudas a los representantes con dudas sobre:
           - Niveles: Maternal, Pre-escolar, Primaria, Secundaria.
-          - Métodos de pago: Transferencia, Pago Móvil, Zelle, Binance, Efectivo.
-          - El proceso consiste en: 1. Pagar en el banco 2. Tomar captura/datos 3. Llenar el formulario en la web.
-          No inventes números de cuenta si no te los dan, dile que revise la sección de 'Datos de Pago'.
-          Responde siempre en español y de forma servicial.`
+          - Métodos de pago aceptados: Transferencia, Pago Móvil, Zelle, Binance, Efectivo.
+          - Proceso de registro: Pagar -> Recopilar referencia -> Registrar en el formulario web.
+          No inventes números de cuenta bancaria. Si preguntan por ellos, sugiere visitar la sección de 'Datos Bancarios'.
+          Tu tono es institucional, profesional y servicial. Responde siempre en español.`
         }
       });
 
@@ -54,11 +54,10 @@ const SupportPage: React.FC = () => {
     <div className="h-[calc(100vh-10rem)] flex flex-col space-y-4 animate-in fade-in duration-700">
       <header className="space-y-2">
         <h2 className="text-3xl font-extrabold text-slate-900">Asistente Virtual</h2>
-        <p className="text-slate-500">Consulta cualquier duda sobre el proceso administrativo.</p>
+        <p className="text-slate-500">Consulta cualquier duda administrativa sobre el Maestro Beltrán Prieto Figueroa.</p>
       </header>
 
       <div className="flex-1 bg-white border rounded-2xl overflow-hidden flex flex-col shadow-sm">
-        {/* Chat Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6">
           {messages.map((m, i) => (
             <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -80,7 +79,7 @@ const SupportPage: React.FC = () => {
           ))}
           {isTyping && (
             <div className="flex justify-start">
-              <div className="flex items-center space-x-2 bg-slate-100 px-4 py-2 rounded-2xl text-slate-400 text-xs">
+              <div className="flex items-center space-x-2 bg-slate-100 px-4 py-2 rounded-2xl text-slate-400 text-xs font-bold">
                 <Loader2 className="animate-spin" size={14} />
                 <span>Escribiendo...</span>
               </div>
@@ -88,7 +87,6 @@ const SupportPage: React.FC = () => {
           )}
         </div>
 
-        {/* Input area */}
         <div className="p-4 border-t bg-slate-50">
           <div className="relative">
             <input 
@@ -97,7 +95,7 @@ const SupportPage: React.FC = () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
               placeholder="Escribe tu duda aquí..."
-              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 pr-12 focus:ring-2 focus:ring-blue-500 outline-none shadow-inner"
+              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 pr-12 focus:ring-2 focus:ring-blue-500 outline-none shadow-inner text-sm"
             />
             <button 
               onClick={handleSend}

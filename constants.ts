@@ -3,7 +3,7 @@ export const SCHOOL_ACCOUNTS = [
   {
     bank: "Banco Mercantil",
     accountNumber: "0105-XXXX-XX-XXXXXXXXXX",
-    holder: "Colegio San José",
+    holder: "Maestro Beltrán Prieto Figueroa",
     id: "J-12345678-0",
     type: "Corriente"
   },
@@ -11,11 +11,11 @@ export const SCHOOL_ACCOUNTS = [
     bank: "Banco de Venezuela (Pago Móvil)",
     phone: "0412-1234567",
     id: "V-12345678",
-    holder: "Admin Escolar"
+    holder: "Admin Maestro Beltrán"
   },
   {
     bank: "Zelle / International",
-    email: "pagos@colegiosanjose.edu",
+    email: "pagos@maestrobeltran.edu",
     holder: "School Administration"
   }
 ];
@@ -37,11 +37,4 @@ export const LEVELS = [
   "Secundaria"
 ];
 
-/**
- * INSTRUCCIONES:
- * 1. Ve a tu Google Sheet.
- * 2. Extensiones > Apps Script.
- * 3. Implementar > Nueva implementación > Aplicación Web.
- * 4. Copia la "URL de la aplicación web" y pégala aquí abajo.
- */
-export const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0UevcatM1C9v_JAtvk33oAA6rHJhRbM_AOMnxad58mkU6g-WpT9O8WeYbt_01EsMZYg/exec";
+export const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
