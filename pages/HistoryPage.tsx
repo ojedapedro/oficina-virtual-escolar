@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { GOOGLE_SCRIPT_URL } from '../constants';
-import { Search, Loader2, Calendar, User, RefreshCw, FileText, AlertCircle, Bookmark, Clock } from 'lucide-react';
+import { GOOGLE_SCRIPT_URL, IS_CONFIGURED } from '../constants';
+import { Search, Loader2, Calendar, User, RefreshCw, FileText, AlertCircle, Bookmark, Clock, Settings } from 'lucide-react';
 
 interface PaymentRecord {
   timestamp: string;
@@ -24,16 +24,32 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ userCedula }) => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchHistory = async () => {
+    if (!IS_CONFIGURED) {
+      setError("Script no configurado");
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=read`);
+      const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=read`, {
+        method: 'GET'
+      });
+      if (!response.ok) throw new Error("Error en respuesta de red");
+      
       const data = await response.json();
-      // Filtrar para mostrar solo los del usuario logueado
-      const filtered = data.filter((p: any) => p.cedularepresentante?.toString().trim() === userCedula.trim());
-      setPayments(filtered);
+      
+      if (Array.isArray(data)) {
+        const filtered = data.filter((p: any) => 
+          p.cedularepresentante?.toString().trim().toLowerCase() === userCedula.trim().toLowerCase()
+        );
+        setPayments(filtered);
+      } else if (data.error) {
+        throw new Error(data.error);
+      }
     } catch (err: any) {
-      setError("Error al cargar historial.");
+      console.error(err);
+      setError("Error al cargar historial. Verifique la consola o la configuración del Deployment ID.");
     } finally {
       setLoading(false);
     }
@@ -70,6 +86,16 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ userCedula }) => {
         </button>
       </header>
 
+      {!IS_CONFIGURED && (
+        <div className="bg-amber-50 border border-amber-200 text-amber-700 p-6 rounded-3xl flex flex-col items-center text-center space-y-3">
+          <Settings className="animate-spin-slow" size={40} />
+          <div className="space-y-1">
+            <h4 className="font-black uppercase text-xs tracking-widest">Acción Requerida</h4>
+            <p className="text-sm font-medium">Debe configurar el <b>Deployment ID</b> de Google Apps Script en el archivo <code className="bg-amber-100 px-1 rounded">constants.ts</code> para visualizar su historial.</p>
+          </div>
+        </div>
+      )}
+
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl flex items-center space-x-3 text-sm font-medium">
           <AlertCircle size={20} />
@@ -82,7 +108,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ userCedula }) => {
           <Loader2 className="animate-spin text-blue-600" size={48} />
           <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">Consultando registros...</p>
         </div>
-      ) : payments.length === 0 ? (
+      ) : payments.length === 0 && IS_CONFIGURED ? (
         <div className="bg-white border border-dashed border-slate-200 rounded-[2.5rem] p-20 text-center space-y-4">
           <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto">
             <FileText size={40} className="text-slate-200" />

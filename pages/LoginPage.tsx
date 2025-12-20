@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { GOOGLE_SCRIPT_URL } from '../constants';
-import { Lock, User, Loader2, AlertCircle, UserPlus, BadgeCheck, Fingerprint } from 'lucide-react';
+import { GOOGLE_SCRIPT_URL, IS_CONFIGURED } from '../constants';
+import { Lock, User, Loader2, AlertCircle, UserPlus, BadgeCheck, Fingerprint, Settings } from 'lucide-react';
 
 const LOGO_URL = "https://i.ibb.co/FbHJbvVT/images.png";
 
@@ -27,10 +27,20 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!IS_CONFIGURED) {
+      setError("Error: El sistema no tiene un ID de despliegue válido en constants.ts");
+      return;
+    }
     setLoading(true);
     resetMessages();
     try {
-      const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=login&user=${encodeURIComponent(cedula)}&pass=${encodeURIComponent(password)}`);
+      // Para Google Apps Script, usamos GET para leer datos y evitar problemas de CORS pre-flight
+      const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=login&user=${encodeURIComponent(cedula)}&pass=${encodeURIComponent(password)}`, {
+        method: 'GET'
+      });
+      
+      if (!response.ok) throw new Error("Servidor no disponible");
+      
       const data = await response.json();
       if (data.result === 'success') {
         localStorage.setItem('user_cedula', cedula);
@@ -39,7 +49,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         setError(data.message || "Credenciales incorrectas.");
       }
     } catch (err: any) {
-      setError("Error de conexión. Intente más tarde.");
+      console.error(err);
+      setError("Error de conexión o configuración del Script. Verifique el Deployment ID.");
     } finally {
       setLoading(false);
     }
@@ -47,11 +58,16 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!IS_CONFIGURED) return;
     setLoading(true);
     resetMessages();
     try {
       const payload = { action: 'register', cedula, clave: password, nombre, matricula };
-      const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+      // Usamos POST sin mode: no-cors para poder leer la respuesta JSON
+      const response = await fetch(GOOGLE_SCRIPT_URL, { 
+        method: 'POST', 
+        body: JSON.stringify(payload) 
+      });
       const data = await response.json();
       if (data.result === 'success') {
         setSuccess("¡Registro exitoso! Ya puede iniciar sesión.");
@@ -60,7 +76,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         setError(data.message || "No se pudo completar el registro.");
       }
     } catch (err: any) {
-      setError("Error al procesar el registro.");
+      setError("Error al procesar el registro. Verifique permisos del Script.");
     } finally {
       setLoading(false);
     }
@@ -72,6 +88,16 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       <div className="absolute bottom-0 -right-10 w-96 h-96 bg-amber-900 rounded-full blur-[150px] opacity-30"></div>
 
       <div className="max-w-md w-full relative z-10 animate-in fade-in zoom-in duration-700">
+        {!IS_CONFIGURED && (
+          <div className="mb-6 bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex items-center space-x-3 text-amber-500">
+            <Settings className="animate-spin-slow" size={24} />
+            <div className="text-xs font-bold leading-tight">
+              CONFIGURACIÓN REQUERIDA: <br/>
+              <span className="opacity-80">Reemplace YOUR_DEPLOYMENT_ID en constants.ts</span>
+            </div>
+          </div>
+        )}
+
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-24 h-24 bg-white rounded-[2rem] shadow-2xl mb-6 p-4">
             <img src={LOGO_URL} alt="Logo" className="w-full h-full object-contain" />
@@ -99,7 +125,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           {(error || success) && (
             <div className={`p-4 rounded-2xl flex items-center space-x-3 text-xs font-bold animate-in slide-in-from-top-2 ${error ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}>
               {error ? <AlertCircle size={18} /> : <BadgeCheck size={18} />}
-              <span>{error || success}</span>
+              <span className="flex-1">{error || success}</span>
             </div>
           )}
 
