@@ -48,4 +48,5 @@ export const LEVELS = [
  */
 const DEPLOYMENT_ID = "AKfycbzs9a_-0PIWvOPWwwzfgQdWBzUZMPwd7AV8NVTOHjsXZPKBEcFKP2X6nezc2O8EZBhA"; // REEMPLAZA ESTO
 export const GOOGLE_SCRIPT_URL = `https://script.google.com/macros/s/${DEPLOYMENT_ID}/exec`;
-export const IS_CONFIGURED = DEPLOYMENT_ID !== "AKfycbzs9a_-0PIWvOPWwwzfgQdWBzUZMPwd7AV8NVTOHjsXZPKBEcFKP2X6nezc2O8EZBhA";
+export const IS_CONFIGURED = typeof DEPLOYMENT_ID === "string" && DEPLOYMENT_ID.length > 0 && !DEPLOYMENT_ID.includes("YOUR_DEPLOYMENT_ID");
+
