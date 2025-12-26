@@ -42,6 +42,14 @@ export const LEVELS = [
   "Secundaria"
 ];
 
-const DEPLOYMENT_ID = "YOUR_DEPLOYMENT_ID"; 
+/**
+ * CONFIGURACIÓN DEL BACKEND (Google Apps Script)
+ * 1. En script.google.com, dale a "Desplegar" -> "Nueva implementación" -> "Aplicación Web".
+ * 2. Acceso: "Cualquier persona" (Anyone).
+ * 3. Copia el "ID de implementación" y pégalo aquí abajo:
+ */
+const DEPLOYMENT_ID = "https://script.google.com/macros/s/AKfycbzBdfC3yAPAtheuAMpBb1jtW98uHIsGL0dONHl33w891WlgyrbsunesQMHqvhkcHDg21A/exec"; 
+
 export const GOOGLE_SCRIPT_URL = `https://script.google.com/macros/s/${DEPLOYMENT_ID}/exec`;
-export const IS_CONFIGURED = DEPLOYMENT_ID !== "YOUR_DEPLOYMENT_ID";
+export const IS_CONFIGURED = DEPLOYMENT_ID !== "https://script.google.com/macros/s/AKfycbzBdfC3yAPAtheuAMpBb1jtW98uHIsGL0dONHl33w891WlgyrbsunesQMHqvhkcHDg21A/exec";
+export const ENABLE_DEMO_MODE = true; // Permite probar la app sin backend configurado
