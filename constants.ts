@@ -30,6 +30,11 @@ export const PAYMENT_TYPES = [
   "Efectivo Euro"
 ];
 
+export const PAYMENT_MODES = [
+  "Pago Total",
+  "Abono"
+];
+
 export const LEVELS = [
   "Maternal",
   "Pre-escolar",
@@ -37,16 +42,6 @@ export const LEVELS = [
   "Secundaria"
 ];
 
-/**
- * IMPORTANTE: 
- * 1. Abre tu script en script.google.com
- * 2. Haz clic en "Desplegar" -> "Nueva implementación".
- * 3. Tipo: "Aplicación Web".
- * 4. Ejecutar como: "Yo" (tu cuenta).
- * 5. Quién tiene acceso: "Cualquier persona" (Anyone).
- * 6. Copia el "ID de implementación" y pégalo abajo.
- */
-const DEPLOYMENT_ID = "AKfycbzs9a_-0PIWvOPWwwzfgQdWBzUZMPwd7AV8NVTOHjsXZPKBEcFKP2X6nezc2O8EZBhA"; // REEMPLAZA ESTO
+const DEPLOYMENT_ID = "YOUR_DEPLOYMENT_ID"; 
 export const GOOGLE_SCRIPT_URL = `https://script.google.com/macros/s/${DEPLOYMENT_ID}/exec`;
-export const IS_CONFIGURED = typeof DEPLOYMENT_ID === "string" && DEPLOYMENT_ID.length > 0 && !DEPLOYMENT_ID.includes("YOUR_DEPLOYMENT_ID");
-
+export const IS_CONFIGURED = DEPLOYMENT_ID !== "YOUR_DEPLOYMENT_ID";

@@ -15,11 +15,11 @@ function setupAppStructure() {
   // 1. Hoja de Pagos
   let pagosSheet = ss.getSheetByName("Pagos") || ss.insertSheet("Pagos");
   pagosSheet.clear();
-  const pagosHeaders = ["Timestamp", "Fecha Registro", "Fecha Pago", "Cedula Representante", "Nivel", "Matricula", "Tipo Pago", "Referencia", "Monto", "Observaciones"];
+  const pagosHeaders = ["Timestamp", "Fecha Registro", "Fecha Pago", "Cedula Representante", "Nivel", "Matricula", "Tipo Pago", "Modo Pago", "Referencia", "Monto", "Observaciones"];
   pagosSheet.appendRow(pagosHeaders);
   pagosSheet.getRange(1, 1, 1, pagosHeaders.length).setFontWeight("bold").setBackground("#d9ead3");
   
-  // 2. Hoja de Usuarios (Actualizada con Nombre y Matricula)
+  // 2. Hoja de Usuarios
   let usuariosSheet = ss.getSheetByName("Usuarios") || ss.insertSheet("Usuarios");
   usuariosSheet.clear();
   const usuariosHeaders = ["Cedula", "Clave", "Nombre", "Matricula"];
@@ -29,7 +29,7 @@ function setupAppStructure() {
   // Usuario de prueba
   usuariosSheet.appendRow(["V-12345678", "1234", "Usuario de Prueba", "AD-2025-001"]);
   
-  return "Estructura actualizada exitosamente.";
+  return "Estructura actualizada exitosamente con Modo de Pago.";
 }
 
 function doGet(e) {
@@ -84,7 +84,6 @@ function doPost(e) {
     const ss = SpreadsheetApp.openById(SHEET_ID);
     const data = JSON.parse(e.postData.contents);
     
-    // Lógica de Registro de Usuario
     if (data.action === 'register') {
       const sheet = ss.getSheetByName("Usuarios");
       const usersData = sheet.getDataRange().getValues();
@@ -98,11 +97,10 @@ function doPost(e) {
       return createJsonResponse({ result: "success", message: "Usuario registrado con éxito." });
     }
     
-    // Lógica de Registro de Pago (Default)
     const sheet = ss.getSheetByName("Pagos");
     sheet.appendRow([
       new Date(), data.fechaRegistro, data.fechaPago, data.cedula, 
-      data.nivel, data.matricula || "N/A", data.tipoPago, 
+      data.nivel, data.matricula || "N/A", data.tipoPago, data.modoPago,
       data.referencia || "N/A", data.monto || 0, data.observaciones || ""
     ]);
     

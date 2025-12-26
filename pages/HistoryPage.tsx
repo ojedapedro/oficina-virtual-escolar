@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { GOOGLE_SCRIPT_URL, IS_CONFIGURED } from '../constants';
-import { Search, Loader2, Calendar, User, RefreshCw, FileText, AlertCircle, Bookmark, Clock, Settings } from 'lucide-react';
+import { Loader2, Calendar, RefreshCw, FileText, AlertCircle, Bookmark, Clock, Settings, Wallet, Target } from 'lucide-react';
 
 interface PaymentRecord {
   timestamp: string;
@@ -10,6 +10,7 @@ interface PaymentRecord {
   cedularepresentante: string;
   nivel: string;
   tipopago: string;
+  modopago: string;
   referencia: string;
   monto: number;
 }
@@ -49,7 +50,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ userCedula }) => {
       }
     } catch (err: any) {
       console.error(err);
-      setError("Error al cargar historial. Verifique la consola o la configuración del Deployment ID.");
+      setError("Error al cargar historial. Verifique la configuración del Deployment ID.");
     } finally {
       setLoading(false);
     }
@@ -91,7 +92,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ userCedula }) => {
           <Settings className="animate-spin-slow" size={40} />
           <div className="space-y-1">
             <h4 className="font-black uppercase text-xs tracking-widest">Acción Requerida</h4>
-            <p className="text-sm font-medium">Debe configurar el <b>Deployment ID</b> de Google Apps Script en el archivo <code className="bg-amber-100 px-1 rounded">constants.ts</code> para visualizar su historial.</p>
+            <p className="text-sm font-medium">Debe configurar el <b>Deployment ID</b> de Google Apps Script.</p>
           </div>
         </div>
       )}
@@ -115,7 +116,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ userCedula }) => {
           </div>
           <div className="space-y-1">
             <p className="text-slate-900 font-bold text-lg">Sin registros previos</p>
-            <p className="text-slate-400 max-w-xs mx-auto">No has reportado ningún pago todavía bajo esta cédula de identidad.</p>
+            <p className="text-slate-400 max-w-xs mx-auto">No has reportado ningún pago todavía.</p>
           </div>
         </div>
       ) : (
@@ -128,8 +129,16 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ userCedula }) => {
                     <span className="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-blue-100">
                       Ref: {p.referencia}
                     </span>
-                    <span className="px-3 py-1 bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-amber-100">
+                    <span className="px-3 py-1 bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-slate-200">
                       {p.tipopago}
+                    </span>
+                    <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border flex items-center gap-1.5 ${
+                      p.modopago === 'Pago Total' 
+                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
+                        : 'bg-amber-50 text-amber-600 border-amber-100'
+                    }`}>
+                      {p.modopago === 'Pago Total' ? <Target size={12} /> : <Wallet size={12} />}
+                      {p.modopago || 'Reportado'}
                     </span>
                   </div>
                   
@@ -159,7 +168,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ userCedula }) => {
                 </div>
 
                 <div className="md:text-right flex flex-col justify-center items-end border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0 md:pl-8">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Monto Validado</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Monto Reportado</p>
                   <p className="text-3xl font-black text-blue-600 tracking-tighter">
                     {Number(p.monto).toLocaleString('es-VE', { minimumFractionDigits: 2 })} <span className="text-lg text-blue-400">$</span>
                   </p>
@@ -172,7 +181,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ userCedula }) => {
 
       <footer className="pt-6 border-t border-slate-100 text-center">
         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-          Los pagos reportados están sujetos a validación por el departamento de administración del MBPF.
+          Administración Maestro Beltrán Prieto Figueroa.
         </p>
       </footer>
     </div>
