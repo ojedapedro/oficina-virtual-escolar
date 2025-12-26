@@ -44,12 +44,11 @@ export const LEVELS = [
 
 /**
  * CONFIGURACIÓN DEL BACKEND (Google Apps Script)
- * 1. En script.google.com, dale a "Desplegar" -> "Nueva implementación" -> "Aplicación Web".
- * 2. Acceso: "Cualquier persona" (Anyone).
- * 3. Copia el "ID de implementación" y pégalo aquí abajo:
+ * ID actualizado con el proporcionado por el usuario.
  */
-const DEPLOYMENT_ID = "AKfycbzBdfC3yAPAtheuAMpBb1jtW98uHIsGL0dONHl33w891WlgyrbsunesQMHqvhkcHDg21A"; 
+// Added string type annotation to fix TS error when comparing with different literal values
+const DEPLOYMENT_ID: string = "AKfycbzBdfC3yAPAtheuAMpBb1jtW98uHIsGL0dONHl33w891WlgyrbsunesQMHqvhkcHDg21A"; 
 
 export const GOOGLE_SCRIPT_URL = `https://script.google.com/macros/s/${DEPLOYMENT_ID}/exec`;
-export const IS_CONFIGURED = DEPLOYMENT_ID !== "AKfycbzBdfC3yAPAtheuAMpBb1jtW98uHIsGL0dONHl33w891WlgyrbsunesQMHqvhkcHDg21A";
-export const ENABLE_DEMO_MODE = true; // Permite probar la app sin backend configurado
+export const IS_CONFIGURED = DEPLOYMENT_ID !== "YOUR_DEPLOYMENT_ID";
+export const ENABLE_DEMO_MODE = true; // Se mantiene por seguridad, pero la app ahora priorizará el backend real.
