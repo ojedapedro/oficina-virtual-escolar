@@ -10,20 +10,20 @@ export interface SchoolAccount {
   type?: string;
 }
 
-// Fixed: Added explicit typing to SCHOOL_ACCOUNTS to support optional fields like email
+// Fixed: Removed "V-" from sample data IDs
 export const SCHOOL_ACCOUNTS: SchoolAccount[] = [
   {
     bank: "Banco Mercantil",
-    accountNumber: "0105-XXXX-XX-XXXXXXXXXX",
-    holder: "Maestro Beltrán Prieto Figueroa",
+    accountNumber: "0105-0000-00-0000000000",
+    holder: "Colegio Maestro Beltrán Prieto Figueroa",
     id: "J-12345678-0",
     type: "Corriente"
   },
   {
-    bank: "Banco de Venezuela (Pago Móvil)",
-    phone: "0412-1234567",
-    id: "V-12345678",
-    holder: "Admin Maestro Beltrán"
+    bank: "Pago Móvil (BDV)",
+    phone: "0412-0000000",
+    id: "12345678",
+    holder: "Administración Escolar"
   }
 ];
 
@@ -50,7 +50,7 @@ export const PAYMENT_TYPES = [
 /**
  * CONFIGURACIÓN DEL BACKEND
  */
-const DEPLOYMENT_ID = "AKfycbxBBsRqQ9nZykVioVqgQ_I3wmCYz3gncOM1rxZbFfgEPF-ijLp0Qp63fAKjsNxcytPNIQ"; 
+const DEPLOYMENT_ID = "AKfycbxNBy31uyMDtIQ0BhfMHlSH4SyTA1w9_dtFO7DdfCFgnkniSXKlEPlB8AEFyQo7aoTvFw"; 
 
 export const GOOGLE_SCRIPT_URL = `https://script.google.com/macros/s/${DEPLOYMENT_ID}/exec`;
 export const IS_CONFIGURED = true;
