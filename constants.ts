@@ -50,7 +50,7 @@ export const PAYMENT_TYPES = [
 /**
  * CONFIGURACIÓN DEL BACKEND
  */
-const DEPLOYMENT_ID = "AKfycbzHAsql95W4Ir5IcvlSIS6wb0QzhTUyWHgD4Gu0gncRhrf1X5FDJ0ibEEy3ViKFgox-yA"; 
+const DEPLOYMENT_ID = "AKfycbxBBsRqQ9nZykVioVqgQ_I3wmCYz3gncOM1rxZbFfgEPF-ijLp0Qp63fAKjsNxcytPNIQ"; 
 
 export const GOOGLE_SCRIPT_URL = `https://script.google.com/macros/s/${DEPLOYMENT_ID}/exec`;
 export const IS_CONFIGURED = true;

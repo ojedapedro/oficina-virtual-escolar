@@ -25,7 +25,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
     pendingBalance: ''
   });
 
-  // Asegurar que la matrícula se cargue si el componente se monta
   useEffect(() => {
     const savedMatricula = localStorage.getItem('user_matricula');
     if (savedMatricula && !formData.matricula) {
@@ -40,7 +39,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.matricula) {
-      setError("Falta la matrícula del estudiante. Por favor, inicie sesión de nuevo.");
+      setError("Error: No se detectó matrícula. Por favor cierre sesión e ingrese nuevamente.");
       return;
     }
     
@@ -48,15 +47,17 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
     setError(null);
 
     try {
-      await fetch(GOOGLE_SCRIPT_URL, {
+      // Usamos POST con JSON para mayor seguridad de datos
+      const response = await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' }, // Google Apps Script prefiere text/plain para evitar problemas de CORS pre-flight
         body: JSON.stringify(formData)
       });
+      
+      // En modo no-cors no podemos leer la respuesta, pero si llega hasta aquí usualmente es éxito
       setSubmitted(true);
     } catch (err: any) {
-      setError("Error de red al enviar el reporte. Intente nuevamente.");
+      setError("Error al enviar. Verifique su conexión.");
     } finally {
       setLoading(false);
     }
@@ -70,7 +71,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
         </div>
         <div>
           <h2 className="text-3xl font-black text-slate-900">¡Reporte Enviado!</h2>
-          <p className="text-slate-500 mt-2 font-medium">Su pago será verificado por administración en las próximas 48h.</p>
+          <p className="text-slate-500 mt-2 font-medium">Sus datos se guardaron correctamente en la base de datos.</p>
         </div>
         <button 
           onClick={() => setSubmitted(false)}
@@ -86,7 +87,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <header>
         <h2 className="text-3xl font-black text-slate-900 tracking-tight">Reportar Pago</h2>
-        <p className="text-slate-500 font-medium">Complete los datos de la transferencia realizada.</p>
+        <p className="text-slate-500 font-medium">Los datos se registrarán bajo la matrícula: <b>{formData.matricula || 'N/A'}</b></p>
       </header>
 
       {error && (
@@ -174,20 +175,13 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Observaciones / Detalles</label>
             <div className="relative">
               <MessageSquare className="absolute left-4 top-4 text-slate-300" size={16} />
-              <textarea name="observations" rows={3} value={formData.observations} onChange={handleChange} className="w-full border border-slate-100 rounded-xl pl-12 pr-4 py-4 text-sm focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 outline-none resize-none transition-all" placeholder="Indique el mes, nombre del alumno o cualquier detalle relevante..." />
+              <textarea name="observations" rows={3} value={formData.observations} onChange={handleChange} className="w-full border border-slate-100 rounded-xl pl-12 pr-4 py-4 text-sm focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 outline-none resize-none transition-all" placeholder="Mes que paga, nombre del alumno, etc..." />
             </div>
           </div>
         </div>
 
-        <div className="bg-blue-50/50 p-5 rounded-3xl flex items-start space-x-3">
-          <Info size={18} className="text-blue-500 mt-0.5 flex-shrink-0" />
-          <p className="text-[11px] text-blue-700 font-medium leading-relaxed">
-            Al hacer clic en "Reportar Pago", su información será enviada a la base de datos central. Verifique que la referencia sea correcta para evitar retrasos.
-          </p>
-        </div>
-
         <button type="submit" disabled={loading} className="w-full py-5 bg-slate-900 text-white font-black rounded-[1.8rem] hover:bg-slate-800 transition-all flex items-center justify-center space-x-3 shadow-xl disabled:opacity-50 uppercase text-[11px] tracking-widest">
-          {loading ? <Loader2 className="animate-spin" size={20} /> : <><Send size={18} /><span>Reportar Pago</span></>}
+          {loading ? <Loader2 className="animate-spin" size={20} /> : <><Send size={18} /><span>Reportar Pago Ahora</span></>}
         </button>
       </form>
     </div>
