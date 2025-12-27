@@ -1,5 +1,17 @@
 
-export const SCHOOL_ACCOUNTS = [
+// Interface to define the expected structure of school banking accounts
+export interface SchoolAccount {
+  bank: string;
+  accountNumber?: string;
+  phone?: string;
+  email?: string;
+  holder: string;
+  id: string;
+  type?: string;
+}
+
+// Fixed: Added explicit typing to SCHOOL_ACCOUNTS to support optional fields like email
+export const SCHOOL_ACCOUNTS: SchoolAccount[] = [
   {
     bank: "Banco Mercantil",
     accountNumber: "0105-XXXX-XX-XXXXXXXXXX",
@@ -12,27 +24,15 @@ export const SCHOOL_ACCOUNTS = [
     phone: "0412-1234567",
     id: "V-12345678",
     holder: "Admin Maestro Beltrán"
-  },
-  {
-    bank: "Zelle / International",
-    email: "pagos@maestrobeltran.edu",
-    holder: "School Administration"
   }
 ];
 
-export const PAYMENT_TYPES = [
+export const PAYMENT_METHODS = [
   "Transferencia",
   "Pago Móvil",
   "Zelle",
-  "Binance",
-  "Efectivo Bs",
   "Efectivo $",
-  "Efectivo Euro"
-];
-
-export const PAYMENT_MODES = [
-  "Pago Total",
-  "Abono"
+  "Efectivo Bs."
 ];
 
 export const LEVELS = [
@@ -42,13 +42,16 @@ export const LEVELS = [
   "Secundaria"
 ];
 
+export const PAYMENT_TYPES = [
+  "Pago Total",
+  "Abono"
+];
+
 /**
- * CONFIGURACIÓN DEL BACKEND (Google Apps Script)
- * ID actualizado con el proporcionado por el usuario.
+ * CONFIGURACIÓN DEL BACKEND
  */
-// Added string type annotation to fix TS error when comparing with different literal values
-const DEPLOYMENT_ID: string = "AKfycbzBdfC3yAPAtheuAMpBb1jtW98uHIsGL0dONHl33w891WlgyrbsunesQMHqvhkcHDg21A"; 
+const DEPLOYMENT_ID = "AKfycbxv497Vl2JiZMx4clinJ-BXmEEHRnZaxfho3-ZRTVp1gtmbk69ncbAHsxxCsPz03vOcyg"; 
 
 export const GOOGLE_SCRIPT_URL = `https://script.google.com/macros/s/${DEPLOYMENT_ID}/exec`;
-export const IS_CONFIGURED = DEPLOYMENT_ID !== "YOUR_DEPLOYMENT_ID";
-export const ENABLE_DEMO_MODE = true; // Se mantiene por seguridad, pero la app ahora priorizará el backend real.
+export const IS_CONFIGURED = true;
+export const ENABLE_DEMO_MODE = false;
