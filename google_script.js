@@ -4,14 +4,9 @@
  */
 const SHEET_ID = "17slRl7f9AKQgCEGF5jDLMGfmOc-unp1gXSRpYFGX1Eg";
 
-/**
- * Función para inicializar las hojas si no existen
- * Ejecutar manualmente una vez o se ejecutará al primer POST/GET
- */
 function setupAppStructure() {
   const ss = SpreadsheetApp.openById(SHEET_ID);
   
-  // 1. Hoja de Pagos (13 columnas)
   let pagosSheet = ss.getSheetByName("Pagos") || ss.insertSheet("Pagos");
   const pagosHeaders = [
     "id", "timestamp", "paymentDate", "cedulaRepresentative", 
@@ -21,25 +16,18 @@ function setupAppStructure() {
   
   if (pagosSheet.getLastRow() === 0) {
     pagosSheet.appendRow(pagosHeaders);
-    pagosSheet.getRange(1, 1, 1, pagosHeaders.length)
-      .setFontWeight("bold")
-      .setBackground("#1e293b")
-      .setFontColor("white");
+    pagosSheet.getRange(1, 1, 1, pagosHeaders.length).setFontWeight("bold").setBackground("#1e293b").setFontColor("white");
   }
   
-  // 2. Hoja de Usuarios
   let usuariosSheet = ss.getSheetByName("Usuarios") || ss.insertSheet("Usuarios");
   const usuariosHeaders = ["cedula", "clave", "nombre", "matricula"];
   
   if (usuariosSheet.getLastRow() === 0) {
     usuariosSheet.appendRow(usuariosHeaders);
-    usuariosSheet.getRange(1, 1, 1, usuariosHeaders.length)
-      .setFontWeight("bold")
-      .setBackground("#1e293b")
-      .setFontColor("white");
+    usuariosSheet.getRange(1, 1, 1, usuariosHeaders.length).setFontWeight("bold").setBackground("#1e293b").setFontColor("white");
   }
   
-  return "Estructura verificada/creada correctamente.";
+  return "Estructura verificada.";
 }
 
 function doGet(e) {
@@ -74,44 +62,52 @@ function doGet(e) {
     });
     return createJsonResponse(rows.reverse());
   }
-  
-  return ContentService.createTextOutput("Servicio Activo").setMimeType(ContentService.MimeType.TEXT);
 }
 
 function doPost(e) {
   const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName("Pagos");
   const data = JSON.parse(e.postData.contents);
   
   if (data.action === 'register') {
-    const sheet = ss.getSheetByName("Usuarios");
-    sheet.appendRow([data.cedula, data.clave, data.nombre, data.matricula]);
+    const uSheet = ss.getSheetByName("Usuarios");
+    uSheet.appendRow([data.cedula, data.clave, data.nombre, data.matricula]);
     return createJsonResponse({ result: "success" });
   }
-  
-  // Registro de Pago con nueva estructura
-  const sheet = ss.getSheetByName("Pagos");
+
+  // --- LÓGICA DE REGISTRO DE PAGO ROBUSTA ---
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const newRow = new Array(headers.length).fill("");
   const newId = "PAY-" + Math.random().toString(36).substr(2, 9).toUpperCase();
   
-  sheet.appendRow([
-    newId,                        // id
-    new Date(),                   // timestamp
-    data.paymentDate,             // paymentDate
-    data.cedulaRepresentative,    // cedulaRepresentative
-    data.matricula,               // matricula
-    data.level,                   // level
-    data.method,                  // method
-    data.reference,               // reference
-    data.amount,                  // amount
-    data.observations,            // observations
-    "Pendiente",                  // status (default)
-    data.type,                    // type (Pago Total / Abono)
-    data.pendingBalance || 0      // pendingBalance
-  ]);
-  
+  // Mapeo explícito de campos según el nombre de la columna
+  const mapping = {
+    "id": newId,
+    "timestamp": new Date(),
+    "paymentDate": data.paymentDate,
+    "cedulaRepresentative": data.cedulaRepresentative,
+    "matricula": data.matricula,
+    "level": data.level,
+    "method": data.method,
+    "reference": data.reference,
+    "amount": data.amount,
+    "observations": data.observations,
+    "status": "Pendiente",
+    "type": data.type,
+    "pendingBalance": data.pendingBalance || 0
+  };
+
+  headers.forEach((header, i) => {
+    const cleanHeader = header.toString().trim();
+    if (mapping[cleanHeader] !== undefined) {
+      newRow[i] = mapping[cleanHeader];
+    }
+  });
+
+  sheet.appendRow(newRow);
   return createJsonResponse({ result: "success", id: newId });
 }
 
 function createJsonResponse(data) {
-  return ContentService.createTextOutput(JSON.stringify(data))
-    .setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
 }

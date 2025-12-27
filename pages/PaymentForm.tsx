@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PAYMENT_METHODS, LEVELS, PAYMENT_TYPES, GOOGLE_SCRIPT_URL } from '../constants';
 import { Send, Loader2, CheckCircle2, AlertCircle, Fingerprint, MessageSquare, Wallet, Target, Info } from 'lucide-react';
 
@@ -25,24 +25,35 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
     pendingBalance: ''
   });
 
+  // Asegurar que la matrícula se cargue si el componente se monta
+  useEffect(() => {
+    const savedMatricula = localStorage.getItem('user_matricula');
+    if (savedMatricula && !formData.matricula) {
+      setFormData(prev => ({ ...prev, matricula: savedMatricula }));
+    }
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.matricula) {
+      setError("Falta la matrícula del estudiante. Por favor, inicie sesión de nuevo.");
+      return;
+    }
+    
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(GOOGLE_SCRIPT_URL, {
+      await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
-        mode: 'no-cors', // Importante para Google Scripts
+        mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-      
-      // Como usamos no-cors no podemos leer la respuesta, pero si no hay error asumimos éxito
       setSubmitted(true);
     } catch (err: any) {
       setError("Error de red al enviar el reporte. Intente nuevamente.");
@@ -75,7 +86,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <header>
         <h2 className="text-3xl font-black text-slate-900 tracking-tight">Reportar Pago</h2>
-        <p className="text-slate-500 font-medium">Complete los 13 campos requeridos para la validación administrativa.</p>
+        <p className="text-slate-500 font-medium">Complete los datos de la transferencia realizada.</p>
       </header>
 
       {error && (
@@ -116,10 +127,10 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Matrícula del Estudiante *</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Matrícula del Estudiante</label>
             <div className="relative">
               <Fingerprint className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
-              <input type="text" name="matricula" required value={formData.matricula} onChange={handleChange} className="w-full border border-slate-100 rounded-xl pl-12 pr-4 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 outline-none transition-all" placeholder="ID Estudiante" />
+              <input type="text" readOnly value={formData.matricula} className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-12 pr-4 py-3.5 text-sm font-bold text-slate-400 outline-none cursor-not-allowed" />
             </div>
           </div>
 
@@ -171,7 +182,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
         <div className="bg-blue-50/50 p-5 rounded-3xl flex items-start space-x-3">
           <Info size={18} className="text-blue-500 mt-0.5 flex-shrink-0" />
           <p className="text-[11px] text-blue-700 font-medium leading-relaxed">
-            Al hacer clic en "Reportar Pago", su información será enviada a la base de datos central bajo el identificador de representante <b>{userCedula}</b>. Verifique que la referencia sea correcta para evitar retrasos.
+            Al hacer clic en "Reportar Pago", su información será enviada a la base de datos central. Verifique que la referencia sea correcta para evitar retrasos.
           </p>
         </div>
 

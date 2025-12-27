@@ -25,38 +25,25 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     setSuccess(null);
   };
 
-  const startDemo = () => {
-    const demoUser = "V-DEMO-2025";
-    localStorage.setItem('user_cedula', demoUser);
-    localStorage.setItem('is_demo', 'true');
-    onLoginSuccess(demoUser);
-  };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!IS_CONFIGURED) {
-      setError("Falta configurar el ID de despliegue en constants.ts. Usa el botón de abajo para probar el Demo.");
-      return;
-    }
     setLoading(true);
     resetMessages();
     try {
-      const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=login&user=${encodeURIComponent(cedula)}&pass=${encodeURIComponent(password)}`, {
-        method: 'GET'
-      });
-      
+      const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=login&user=${encodeURIComponent(cedula)}&pass=${encodeURIComponent(password)}`);
       if (!response.ok) throw new Error("Servidor no disponible");
       
       const data = await response.json();
       if (data.result === 'success') {
         localStorage.setItem('user_cedula', cedula);
-        localStorage.removeItem('is_demo');
+        localStorage.setItem('user_matricula', data.matricula || '');
+        localStorage.setItem('user_nombre', data.nombre || '');
         onLoginSuccess(cedula);
       } else {
         setError(data.message || "Cédula o clave incorrecta.");
       }
     } catch (err: any) {
-      setError("Error de conexión. ¿Ya desplegaste el Script como Aplicación Web?");
+      setError("Error de conexión. Verifique su internet.");
     } finally {
       setLoading(false);
     }
@@ -64,7 +51,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!IS_CONFIGURED) return;
     setLoading(true);
     resetMessages();
     try {
@@ -73,13 +59,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         method: 'POST', 
         body: JSON.stringify(payload) 
       });
-      const data = await response.json();
-      if (data.result === 'success') {
-        setSuccess("¡Registro exitoso! Ya puede iniciar sesión.");
-        setIsRegistering(false);
-      } else {
-        setError(data.message || "No se pudo completar el registro.");
-      }
+      // Registro exitoso
+      setSuccess("¡Registro exitoso! Ya puede iniciar sesión.");
+      setIsRegistering(false);
     } catch (err: any) {
       setError("Error al procesar el registro.");
     } finally {
@@ -93,27 +75,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       <div className="absolute bottom-0 -right-10 w-96 h-96 bg-amber-900 rounded-full blur-[150px] opacity-30"></div>
 
       <div className="max-w-md w-full relative z-10 animate-in fade-in zoom-in duration-700">
-        {!IS_CONFIGURED && (
-          <div className="mb-6 bg-amber-500/10 border border-amber-500/20 rounded-2xl p-5 flex flex-col space-y-3 text-amber-500 backdrop-blur-md">
-            <div className="flex items-center space-x-3">
-              <Settings className="animate-spin-slow" size={20} />
-              <h4 className="text-xs font-black uppercase tracking-widest">Configuración Pendiente</h4>
-            </div>
-            <p className="text-[11px] font-medium leading-relaxed opacity-90">
-              Para usar el sistema real, debes pegar tu <b>Deployment ID</b> de Google en <code className="bg-amber-500/20 px-1 rounded">constants.ts</code>.
-            </p>
-            {ENABLE_DEMO_MODE && (
-              <button 
-                onClick={startDemo}
-                className="w-full py-2.5 bg-amber-500 text-amber-950 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-amber-400 transition-colors flex items-center justify-center space-x-2"
-              >
-                <PlayCircle size={14} />
-                <span>Entrar en Modo Demo</span>
-              </button>
-            )}
-          </div>
-        )}
-
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-[1.8rem] shadow-2xl mb-4 p-4">
             <img src={LOGO_URL} alt="Logo" className="w-full h-full object-contain" />
@@ -144,7 +105,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] font-black text-slate-400 ml-1 uppercase tracking-widest">Matrícula</label>
-                  <input type="text" required value={matricula} onChange={(e) => setMatricula(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500/20" />
+                  <input type="text" required value={matricula} onChange={(e) => setMatricula(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="Ej: mat-2025-XX" />
                 </div>
               </>
             )}
