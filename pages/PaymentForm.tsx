@@ -14,8 +14,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
   
   const [formData, setFormData] = useState({
     paymentDate: '',
-    cedulaRepresentative: userCedula,
+    cedulaRepresen: userCedula,
     matricula: localStorage.getItem('user_matricula') || '',
+    Nombre: localStorage.getItem('user_nombre') || '',
     level: LEVELS[0],
     method: PAYMENT_METHODS[0],
     reference: '',
@@ -27,8 +28,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
 
   useEffect(() => {
     const savedMatricula = localStorage.getItem('user_matricula');
+    const savedNombre = localStorage.getItem('user_nombre');
     if (savedMatricula && !formData.matricula) {
-      setFormData(prev => ({ ...prev, matricula: savedMatricula }));
+      setFormData(prev => ({ ...prev, matricula: savedMatricula, Nombre: savedNombre || '' }));
     }
   }, []);
 
@@ -39,8 +41,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Enviando reporte de pago...");
-
+    
     if (!formData.matricula) {
       setError("Error: No se encontró matrícula. Cierre sesión e intente de nuevo.");
       return;
@@ -50,7 +51,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
     setError(null);
 
     try {
-      // Usamos mode 'no-cors' para evitar errores de red pero aseguramos que el cuerpo sea enviado
       await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -58,12 +58,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
         body: JSON.stringify(formData)
       });
       
-      // Con no-cors no podemos leer el JSON de respuesta, así que asumimos éxito tras el envío
-      console.log("Envío completado satisfactoriamente.");
       setSubmitted(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
-      console.error("Error en el envío:", err);
       setError("No se pudo conectar con el servidor administrativo.");
     } finally {
       setLoading(false);
@@ -136,8 +133,8 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Cédula del Representante</label>
-            <input type="text" readOnly value={formData.cedulaRepresentative} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-4 text-sm font-bold text-slate-400 outline-none" />
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Representante</label>
+            <input type="text" readOnly value={formData.Nombre} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-4 text-sm font-bold text-slate-400 outline-none" />
           </div>
 
           <div className="space-y-1.5">

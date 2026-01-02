@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { GOOGLE_SCRIPT_URL } from '../constants';
-import { Loader2, Calendar, RefreshCw, FileText, Bookmark, Clock, Target, Wallet, CheckCircle2, AlertCircle, Timer } from 'lucide-react';
+import { Loader2, Calendar, RefreshCw, FileText, Bookmark, Clock, Target, Wallet, CheckCircle2, AlertCircle, Timer, User as UserIcon } from 'lucide-react';
 
 interface PaymentRecord {
   id: string;
   timestamp: string;
   paymentDate: string;
-  cedulaRepresentative: string;
+  cedulaRepresen: string;
   matricula: string;
   level: string;
   method: string;
@@ -17,6 +17,7 @@ interface PaymentRecord {
   status: string;
   type: string;
   pendingBalance: number;
+  Nombre: string;
 }
 
 interface HistoryPageProps {
@@ -36,7 +37,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ userCedula }) => {
       const data = await response.json();
       if (Array.isArray(data)) {
         const filtered = data.filter((p: any) => 
-          p.cedulaRepresentative?.toString().trim() === userCedula.trim()
+          p.cedulaRepresen?.toString().trim() === userCedula.trim()
         );
         setPayments(filtered);
       }
@@ -70,7 +71,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ userCedula }) => {
       <header className="flex justify-between items-end">
         <div>
           <h2 className="text-3xl font-black text-slate-900 tracking-tight">Mis Reportes</h2>
-          <p className="text-slate-500 font-medium">Historial detallado de 13 campos por registro.</p>
+          <p className="text-slate-500 font-medium">Historial detallado de sus registros escolares.</p>
         </div>
         <button onClick={fetchHistory} disabled={loading} className="p-4 bg-white text-slate-900 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all">
           <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
@@ -87,14 +88,14 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ userCedula }) => {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24 space-y-4">
           <Loader2 className="animate-spin text-blue-600" size={48} />
-          <p className="text-slate-400 font-black text-[10px] uppercase tracking-[0.3em]">Cargando base de datos...</p>
+          <p className="text-slate-400 font-black text-[10px] uppercase tracking-[0.3em]">Sincronizando con base de datos...</p>
         </div>
       ) : payments.length === 0 ? (
         <div className="bg-white border-2 border-dashed border-slate-100 rounded-[3rem] p-24 text-center space-y-4">
           <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto">
             <FileText size={32} className="text-slate-200" />
           </div>
-          <p className="text-slate-400 font-bold">No se encontraron reportes asociados a esta cédula.</p>
+          <p className="text-slate-400 font-bold">No se encontraron reportes para esta cédula en la nueva base de datos.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6">
@@ -122,9 +123,16 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ userCedula }) => {
                       <Bookmark size={20} className="text-blue-600" />
                       {p.level}
                     </h3>
-                    <p className="text-xs font-bold text-slate-400 flex items-center gap-1">
-                      Matrícula: <span className="text-slate-600">{p.matricula}</span> | Ref: <span className="text-slate-600">{p.reference}</span>
-                    </p>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-xs font-bold text-slate-400 flex items-center gap-1">
+                        Matrícula: <span className="text-slate-600">{p.matricula}</span> | Ref: <span className="text-slate-600">{p.reference}</span>
+                      </p>
+                      {p.Nombre && (
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                          <UserIcon size={12} /> {p.Nombre}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-6 pt-2">
