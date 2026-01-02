@@ -10,7 +10,6 @@ export interface SchoolAccount {
   type?: string;
 }
 
-// Fixed: Removed "V-" from sample data IDs
 export const SCHOOL_ACCOUNTS: SchoolAccount[] = [
   {
     bank: "Banco Mercantil",
@@ -48,8 +47,9 @@ export const PAYMENT_TYPES = [
 ];
 
 /**
- * CONFIGURACIÓN DEL BACKEND
- * Actualizado con el nuevo ID y URL proporcionados
+ * IMPORTANTE: Si actualizaste el archivo google_script.js, 
+ * DEBES generar una "Nueva Versión" en Implementar > Gestionar implementaciones
+ * y asegurarte de que el ID aquí sea el de la última implementación.
  */
 const DEPLOYMENT_ID = "AKfycbzukQqdf8KhX_dWGYHDzsOlg2RNkudANLhDb9lq7zu3v18odDGGVSqRqydd2Zat_PvYbA"; 
 
