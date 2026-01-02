@@ -4,6 +4,8 @@
  * ID de hoja: SistemLbeltranPfigueroa
  */
 const SHEET_ID = "1vhTFY-DLkHZIvTozAj-_ZiJDLftgkHmh494OM9EjDdQ";
+const TARGET_SHEET_NAME = "OficinaVirtual"; // DESTINO ÚNICO PARA LA APP
+const USER_SHEET_NAME = "Uove";           // HOJA DE USUARIOS
 
 /**
  * Función para inicializar la estructura exacta. 
@@ -19,8 +21,8 @@ function setupAppStructure() {
     "status", "type", "pendingBalance", "nombre", "EstatusSistema"
   ];
 
-  let ovSheet = ss.getSheetByName("OficinaVirtual") || ss.insertSheet("OficinaVirtual");
-  ovSheet.clearContents(); // Reiniciamos cabeceras para asegurar orden
+  let ovSheet = ss.getSheetByName(TARGET_SHEET_NAME) || ss.insertSheet(TARGET_SHEET_NAME);
+  ovSheet.clearContents(); 
   ovSheet.getRange(1, 1, 1, ovHeaders.length).setValues([ovHeaders]);
   ovSheet.getRange(1, 1, 1, ovHeaders.length)
     .setFontWeight("bold")
@@ -30,13 +32,13 @@ function setupAppStructure() {
   
   // 2. ESTRUCTURA DE USUARIOS (Hoja: Uove)
   const uoveHeaders = ["cedula", "clave", "nombre", "matricula"];
-  let uoveSheet = ss.getSheetByName("Uove") || ss.insertSheet("Uove");
+  let uoveSheet = ss.getSheetByName(USER_SHEET_NAME) || ss.insertSheet(USER_SHEET_NAME);
   if (uoveSheet.getLastRow() === 0) {
     uoveSheet.getRange(1, 1, 1, uoveHeaders.length).setValues([uoveHeaders]);
     uoveSheet.getRange(1, 1, 1, uoveHeaders.length).setFontWeight("bold");
   }
   
-  return "Estructura configurada. Ahora los datos irán solo a OficinaVirtual.";
+  return "Estructura configurada con éxito. La APP ahora solo escribirá en " + TARGET_SHEET_NAME;
 }
 
 function doGet(e) {
@@ -46,8 +48,8 @@ function doGet(e) {
   if (action === 'login') {
     const user = e.parameter.user;
     const pass = e.parameter.pass;
-    const uoveSheet = ss.getSheetByName("Uove");
-    if (!uoveSheet) return createJsonResponse({ result: "error", message: "Hoja Uove no encontrada." });
+    const uoveSheet = ss.getSheetByName(USER_SHEET_NAME);
+    if (!uoveSheet) return createJsonResponse({ result: "error", message: "Error: No existe la hoja de usuarios " + USER_SHEET_NAME });
     
     const data = uoveSheet.getDataRange().getValues();
     const found = data.slice(1).find(row => 
@@ -66,7 +68,7 @@ function doGet(e) {
   }
 
   if (action === 'read') {
-    const sheet = ss.getSheetByName("OficinaVirtual");
+    const sheet = ss.getSheetByName(TARGET_SHEET_NAME);
     if (!sheet || sheet.getLastRow() < 2) return createJsonResponse([]);
     
     const data = sheet.getDataRange().getValues();
@@ -89,18 +91,17 @@ function doPost(e) {
     const data = JSON.parse(rawData);
     
     if (data.action === 'register') {
-      const uoveSheet = ss.getSheetByName("Uove") || ss.insertSheet("Uove");
+      const uoveSheet = ss.getSheetByName(USER_SHEET_NAME) || ss.insertSheet(USER_SHEET_NAME);
       uoveSheet.appendRow([data.cedula, data.clave, data.nombre, data.matricula]);
       return createJsonResponse({ result: "success" });
     }
 
-    // DESTINO FORZADO: OficinaVirtual
-    const sheet = ss.getSheetByName("OficinaVirtual") || ss.insertSheet("OficinaVirtual");
+    // BLOQUEO DE SEGURIDAD: Solo escribimos en OficinaVirtual
+    const sheet = ss.getSheetByName(TARGET_SHEET_NAME) || ss.insertSheet(TARGET_SHEET_NAME);
     
-    // Mapeo manual por índice para garantizar que no haya errores de cabecera
-    // [id, timestamp, paymentDate, cedulaRepresen, matricula, level, method, reference, amount, observations, status, type, pendingBalance, nombre, EstatusSistema]
+    // Mapeo manual por índice para garantizar posición exacta en las columnas de OficinaVirtual
     const rowToAppend = [
-      "OV-" + Math.random().toString(36).substr(2, 7).toUpperCase(), // A: id
+      "OV-" + Math.random().toString(36).substr(2, 7).toUpperCase(), // A: id (PREFIJO OV ES CLAVE)
       new Date(),                                                     // B: timestamp
       data.paymentDate || "",                                         // C: paymentDate
       data.cedulaRepresen || "",                                      // D: cedulaRepresen
