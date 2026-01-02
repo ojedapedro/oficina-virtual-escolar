@@ -51,7 +51,7 @@ export const PAYMENT_TYPES = [
  * DEBES generar una "Nueva Versión" en Implementar > Gestionar implementaciones
  * y asegurarte de que el ID aquí sea el de la última implementación.
  */
-const DEPLOYMENT_ID = "AKfycbzukQqdf8KhX_dWGYHDzsOlg2RNkudANLhDb9lq7zu3v18odDGGVSqRqydd2Zat_PvYbA"; 
+const DEPLOYMENT_ID = "AKfycbxnmO5HJRHXKvKsVcXN08NcVw8utufZU4pQ8gOqB_KS230h9zI0u4_jrE7Z_L9LK1d57g"; 
 
 export const GOOGLE_SCRIPT_URL = `https://script.google.com/macros/s/${DEPLOYMENT_ID}/exec`;
 export const IS_CONFIGURED = true;
