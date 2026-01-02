@@ -17,7 +17,7 @@ interface PaymentRecord {
   status: string;
   type: string;
   pendingBalance: number;
-  Nombre: string;
+  nombre: string;
 }
 
 interface HistoryPageProps {
@@ -36,13 +36,14 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ userCedula }) => {
       const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=read`);
       const data = await response.json();
       if (Array.isArray(data)) {
+        // Filtramos por cedulaRepresen que es el nombre de la columna en OficinaVirtual
         const filtered = data.filter((p: any) => 
           p.cedulaRepresen?.toString().trim() === userCedula.trim()
         );
         setPayments(filtered);
       }
     } catch (err: any) {
-      setError("Error al sincronizar con la oficina virtual.");
+      setError("Error al sincronizar con la Oficina Virtual.");
     } finally {
       setLoading(false);
     }
@@ -58,20 +59,12 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ userCedula }) => {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch(status?.toLowerCase()) {
-      case 'validado': return <CheckCircle2 size={12} />;
-      case 'rechazado': return <AlertCircle size={12} />;
-      default: return <Timer size={12} />;
-    }
-  };
-
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <header className="flex justify-between items-end">
         <div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Mis Reportes</h2>
-          <p className="text-slate-500 font-medium">Historial detallado de sus registros escolares.</p>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Reportes Oficina Virtual</h2>
+          <p className="text-slate-500 font-medium">Historial exclusivo de pagos web.</p>
         </div>
         <button onClick={fetchHistory} disabled={loading} className="p-4 bg-white text-slate-900 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all">
           <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
@@ -88,19 +81,19 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ userCedula }) => {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24 space-y-4">
           <Loader2 className="animate-spin text-blue-600" size={48} />
-          <p className="text-slate-400 font-black text-[10px] uppercase tracking-[0.3em]">Sincronizando con base de datos...</p>
+          <p className="text-slate-400 font-black text-[10px] uppercase tracking-[0.3em]">Consultando OficinaVirtual...</p>
         </div>
       ) : payments.length === 0 ? (
         <div className="bg-white border-2 border-dashed border-slate-100 rounded-[3rem] p-24 text-center space-y-4">
           <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto">
             <FileText size={32} className="text-slate-200" />
           </div>
-          <p className="text-slate-400 font-bold">No se encontraron reportes para esta cédula en la nueva base de datos.</p>
+          <p className="text-slate-400 font-bold">Aún no has reportado pagos a través de la Oficina Virtual.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6">
           {payments.map((p, idx) => (
-            <div key={idx} className="group bg-white border border-slate-100 p-8 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500">
+            <div key={idx} className="group bg-white border border-slate-100 p-8 rounded-[2.5rem] shadow-sm hover:shadow-xl transition-all duration-500">
               <div className="flex flex-col lg:flex-row justify-between gap-8">
                 
                 <div className="space-y-5 flex-1">
@@ -109,37 +102,19 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ userCedula }) => {
                       ID: {p.id}
                     </span>
                     <span className={`px-3 py-1 text-[9px] font-black uppercase tracking-widest rounded-full border flex items-center gap-1.5 ${getStatusStyle(p.status)}`}>
-                      {getStatusIcon(p.status)}
                       {p.status || 'Pendiente'}
-                    </span>
-                    <span className={`px-3 py-1 text-[9px] font-black uppercase tracking-widest rounded-full border flex items-center gap-1.5 ${p.type === 'Pago Total' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-purple-50 text-purple-600 border-purple-100'}`}>
-                      {p.type === 'Pago Total' ? <Target size={12} /> : <Wallet size={12} />}
-                      {p.type}
                     </span>
                   </div>
 
                   <div className="space-y-1">
-                    <h3 className="text-2xl font-black text-slate-900 flex items-center gap-2">
-                      <Bookmark size={20} className="text-blue-600" />
-                      {p.level}
-                    </h3>
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-xs font-bold text-slate-400 flex items-center gap-1">
-                        Matrícula: <span className="text-slate-600">{p.matricula}</span> | Ref: <span className="text-slate-600">{p.reference}</span>
-                      </p>
-                      {p.Nombre && (
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                          <UserIcon size={12} /> {p.Nombre}
-                        </p>
-                      )}
-                    </div>
+                    <h3 className="text-2xl font-black text-slate-900">{p.level}</h3>
+                    <p className="text-xs font-bold text-slate-400">Ref: {p.reference} | Matrícula: {p.matricula}</p>
+                    <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1">
+                      <UserIcon size={12} /> {p.nombre}
+                    </p>
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-6 pt-2">
-                    <div className="space-y-1">
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1"><Clock size={10} /> Registro</p>
-                      <p className="text-xs font-bold text-slate-700">{new Date(p.timestamp).toLocaleDateString()}</p>
-                    </div>
                     <div className="space-y-1">
                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1"><Calendar size={10} /> Pago</p>
                       <p className="text-xs font-bold text-slate-700">{new Date(p.paymentDate).toLocaleDateString()}</p>
@@ -149,30 +124,16 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ userCedula }) => {
                       <p className="text-xs font-bold text-slate-700">{p.method}</p>
                     </div>
                   </div>
-
-                  {p.observations && (
-                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                      <p className="text-[10px] text-slate-400 italic font-medium leading-relaxed">"{p.observations}"</p>
-                    </div>
-                  )}
                 </div>
 
                 <div className="lg:w-48 flex flex-col justify-center lg:items-end lg:border-l lg:border-slate-100 lg:pl-8">
-                  <div className="space-y-4">
-                    <div className="text-right">
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Monto Pagado</p>
-                      <p className="text-3xl font-black text-blue-600 tracking-tighter">
-                        ${Number(p.amount).toFixed(2)}
-                      </p>
-                    </div>
-                    
+                  <div className="text-right">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Monto Registrado</p>
+                    <p className="text-3xl font-black text-blue-600 tracking-tighter">
+                      ${Number(p.amount).toFixed(2)}
+                    </p>
                     {p.type === 'Abono' && (
-                      <div className="text-right p-3 bg-red-50 rounded-2xl border border-red-100">
-                        <p className="text-[8px] font-black text-red-400 uppercase tracking-widest mb-1">Saldo Pendiente</p>
-                        <p className="text-lg font-black text-red-600 tracking-tighter">
-                          ${Number(p.pendingBalance).toFixed(2)}
-                        </p>
-                      </div>
+                      <p className="text-[10px] font-bold text-red-500 mt-1">Deuda: ${p.pendingBalance}</p>
                     )}
                   </div>
                 </div>

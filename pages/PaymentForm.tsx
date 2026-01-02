@@ -14,9 +14,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
   
   const [formData, setFormData] = useState({
     paymentDate: '',
-    cedulaRepresen: userCedula,
-    matricula: localStorage.getItem('user_matricula') || '',
-    Nombre: localStorage.getItem('user_nombre') || '',
+    cedulaRepresen: userCedula, // Coincide con OficinaVirtual Col D
+    matricula: localStorage.getItem('user_matricula') || '', // Coincide con OficinaVirtual Col E
+    nombre: localStorage.getItem('user_nombre') || '', // Coincide con OficinaVirtual Col N
     level: LEVELS[0],
     method: PAYMENT_METHODS[0],
     reference: '',
@@ -30,7 +30,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
     const savedMatricula = localStorage.getItem('user_matricula');
     const savedNombre = localStorage.getItem('user_nombre');
     if (savedMatricula && !formData.matricula) {
-      setFormData(prev => ({ ...prev, matricula: savedMatricula, Nombre: savedNombre || '' }));
+      setFormData(prev => ({ ...prev, matricula: savedMatricula, nombre: savedNombre || '' }));
     }
   }, []);
 
@@ -41,16 +41,11 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.matricula) {
-      setError("Error: No se encontró matrícula. Cierre sesión e intente de nuevo.");
-      return;
-    }
-    
     setLoading(true);
     setError(null);
 
     try {
+      // Enviamos el objeto con las llaves que el script espera para OficinaVirtual
       await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -61,7 +56,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
       setSubmitted(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
-      setError("No se pudo conectar con el servidor administrativo.");
+      setError("No se pudo conectar con el servidor de la Oficina Virtual.");
     } finally {
       setLoading(false);
     }
@@ -74,9 +69,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
           <CheckCircle2 size={48} />
         </div>
         <div>
-          <h2 className="text-3xl font-black text-slate-900">¡Reporte Registrado!</h2>
+          <h2 className="text-3xl font-black text-slate-900">¡Reporte Enviado!</h2>
           <p className="text-slate-500 mt-2 font-medium max-w-xs mx-auto">
-            Su pago ha sido enviado exitosamente y será validado por administración en breve.
+            Su pago ha sido registrado en la base de datos de la Oficina Virtual satisfactoriamente.
           </p>
         </div>
         <button 
@@ -94,10 +89,10 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
       <header>
         <div className="flex items-center space-x-2 text-blue-600 font-black text-[10px] uppercase tracking-[0.2em] mb-2">
           <Fingerprint size={14} />
-          <span>Matrícula: {formData.matricula || 'N/A'}</span>
+          <span>ID Oficina Virtual: {formData.matricula || 'N/A'}</span>
         </div>
-        <h2 className="text-3xl font-black text-slate-900 tracking-tight">Reportar Pago</h2>
-        <p className="text-slate-500 font-medium">Ingrese los detalles de su operación bancaria.</p>
+        <h2 className="text-3xl font-black text-slate-900 tracking-tight">Registro de Pago</h2>
+        <p className="text-slate-500 font-medium">Los datos se guardarán exclusivamente en la hoja OficinaVirtual.</p>
       </header>
 
       {error && (
@@ -110,36 +105,19 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
       <form onSubmit={handleSubmit} className="bg-white border border-slate-100 rounded-[2.5rem] p-8 md:p-10 shadow-sm space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
-          <div className="space-y-4 md:col-span-2">
-            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Modalidad de Pago *</label>
-            <div className="grid grid-cols-2 gap-4">
-              {PAYMENT_TYPES.map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => setFormData(p => ({ ...p, type }))}
-                  className={`
-                    flex items-center justify-center space-x-3 p-5 rounded-2xl border-2 transition-all
-                    ${formData.type === type 
-                      ? 'border-blue-600 bg-blue-50 text-blue-700' 
-                      : 'border-slate-50 bg-slate-50 text-slate-400 hover:border-slate-200'}
-                  `}
-                >
-                  {type === 'Pago Total' ? <Target size={20} /> : <Wallet size={20} />}
-                  <span className="font-black text-xs uppercase tracking-widest">{type}</span>
-                </button>
-              ))}
-            </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nombre Completo</label>
+            <input type="text" readOnly value={formData.nombre} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-4 text-sm font-bold text-slate-500 outline-none" />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Representante</label>
-            <input type="text" readOnly value={formData.Nombre} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-4 text-sm font-bold text-slate-400 outline-none" />
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Cédula del Representante</label>
+            <input type="text" readOnly value={formData.cedulaRepresen} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-4 text-sm font-bold text-slate-500 outline-none" />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Matrícula</label>
-            <input type="text" readOnly value={formData.matricula} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-4 text-sm font-bold text-slate-400 outline-none" />
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Matrícula Escolar</label>
+            <input type="text" readOnly value={formData.matricula} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-4 text-sm font-bold text-slate-500 outline-none" />
           </div>
 
           <div className="space-y-1.5">
@@ -162,8 +140,8 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Número de Referencia *</label>
-            <input type="text" name="reference" required value={formData.reference} onChange={handleChange} className="w-full border border-slate-100 rounded-xl px-4 py-4 text-sm focus:ring-4 focus:ring-blue-500/5 outline-none font-mono" placeholder="Referencia bancaria" />
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Referencia Bancaria *</label>
+            <input type="text" name="reference" required value={formData.reference} onChange={handleChange} className="w-full border border-slate-100 rounded-xl px-4 py-4 text-sm focus:ring-4 focus:ring-blue-500/5 outline-none font-mono" placeholder="Número de operación" />
           </div>
 
           <div className="space-y-1.5">
@@ -171,43 +149,43 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
             <input type="number" name="amount" step="0.01" required value={formData.amount} onChange={handleChange} className="w-full border border-slate-100 rounded-xl px-4 py-4 text-sm focus:ring-4 focus:ring-blue-500/5 outline-none font-bold text-blue-600" placeholder="0.00" />
           </div>
 
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tipo de Pago *</label>
+            <select name="type" value={formData.type} onChange={handleChange} className="w-full border border-slate-100 rounded-xl px-4 py-4 text-sm focus:ring-4 focus:ring-blue-500/5 outline-none bg-white">
+              {PAYMENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+
           {formData.type === 'Abono' && (
             <div className="space-y-1.5 animate-in slide-in-from-left-2">
-              <label className="text-[10px] font-black text-red-400 uppercase tracking-widest ml-1">Saldo Restante ($) *</label>
+              <label className="text-[10px] font-black text-red-400 uppercase tracking-widest ml-1">Saldo Pendiente ($) *</label>
               <input type="number" name="pendingBalance" step="0.01" required value={formData.pendingBalance} onChange={handleChange} className="w-full border border-red-100 bg-red-50/30 rounded-xl px-4 py-4 text-sm focus:ring-4 focus:ring-red-500/5 outline-none font-bold text-red-600" placeholder="0.00" />
             </div>
           )}
 
           <div className="space-y-1.5 md:col-span-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Notas u Observaciones</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Observaciones</label>
             <div className="relative">
               <MessageSquare className="absolute left-4 top-4 text-slate-300" size={16} />
-              <textarea name="observations" rows={3} value={formData.observations} onChange={handleChange} className="w-full border border-slate-100 rounded-xl pl-12 pr-4 py-4 text-sm focus:ring-4 focus:ring-blue-500/5 outline-none resize-none transition-all" placeholder="Detalle el pago aquí..." />
+              <textarea name="observations" rows={3} value={formData.observations} onChange={handleChange} className="w-full border border-slate-100 rounded-xl pl-12 pr-4 py-4 text-sm focus:ring-4 focus:ring-blue-500/5 outline-none resize-none" placeholder="Opcional: Detalles adicionales..." />
             </div>
           </div>
-        </div>
-
-        <div className="bg-slate-50 p-6 rounded-3xl flex items-start space-x-3 border border-slate-100">
-          <Info size={20} className="text-slate-400 mt-0.5 flex-shrink-0" />
-          <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-            Por favor, asegúrese de que la referencia y el monto coincidan exactamente con su comprobante bancario para evitar rechazos.
-          </p>
         </div>
 
         <button 
           type="submit" 
           disabled={loading} 
-          className="w-full py-5 bg-slate-900 text-white font-black rounded-[1.8rem] hover:bg-slate-800 transition-all flex items-center justify-center space-x-3 shadow-xl disabled:opacity-50 uppercase text-[11px] tracking-widest active:scale-[0.98]"
+          className="w-full py-5 bg-slate-900 text-white font-black rounded-[1.8rem] hover:bg-slate-800 transition-all flex items-center justify-center space-x-3 shadow-xl disabled:opacity-50 uppercase text-[11px] tracking-widest"
         >
           {loading ? (
             <>
               <Loader2 className="animate-spin" size={20} />
-              <span>Enviando...</span>
+              <span>Guardando en Oficina Virtual...</span>
             </>
           ) : (
             <>
               <Send size={18} />
-              <span>Reportar Pago Ahora</span>
+              <span>Confirmar Registro</span>
             </>
           )}
         </button>
