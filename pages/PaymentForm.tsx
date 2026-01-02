@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { PAYMENT_METHODS, LEVELS, PAYMENT_TYPES, GOOGLE_SCRIPT_URL } from '../constants';
-import { Send, Loader2, CheckCircle2, AlertCircle, Fingerprint, MessageSquare, Wallet, Target, Info } from 'lucide-react';
+import { Send, Loader2, CheckCircle2, AlertCircle, Fingerprint, MessageSquare } from 'lucide-react';
 
 interface PaymentFormProps {
   userCedula: string;
@@ -13,10 +13,11 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
   const [error, setError] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
+    action: 'payment', // Añadimos acción explícita
     paymentDate: '',
-    cedulaRepresen: userCedula, // Coincide con OficinaVirtual Col D
-    matricula: localStorage.getItem('user_matricula') || '', // Coincide con OficinaVirtual Col E
-    nombre: localStorage.getItem('user_nombre') || '', // Coincide con OficinaVirtual Col N
+    cedulaRepresentative: userCedula, 
+    matricula: localStorage.getItem('user_matricula') || '',
+    nombre: localStorage.getItem('user_nombre') || '',
     level: LEVELS[0],
     method: PAYMENT_METHODS[0],
     reference: '',
@@ -45,7 +46,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
     setError(null);
 
     try {
-      // Enviamos el objeto con las llaves que el script espera para OficinaVirtual
+      // POST directo al script
       await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -56,7 +57,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
       setSubmitted(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
-      setError("No se pudo conectar con el servidor de la Oficina Virtual.");
+      setError("Error de red: Verifique su conexión.");
     } finally {
       setLoading(false);
     }
@@ -71,7 +72,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
         <div>
           <h2 className="text-3xl font-black text-slate-900">¡Reporte Enviado!</h2>
           <p className="text-slate-500 mt-2 font-medium max-w-xs mx-auto">
-            Su pago ha sido registrado en la base de datos de la Oficina Virtual satisfactoriamente.
+            Su pago ha sido registrado en la hoja <strong>OficinaVirtual</strong> correctamente.
           </p>
         </div>
         <button 
@@ -89,10 +90,10 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
       <header>
         <div className="flex items-center space-x-2 text-blue-600 font-black text-[10px] uppercase tracking-[0.2em] mb-2">
           <Fingerprint size={14} />
-          <span>ID Oficina Virtual: {formData.matricula || 'N/A'}</span>
+          <span>Validación: Oficina Virtual</span>
         </div>
         <h2 className="text-3xl font-black text-slate-900 tracking-tight">Registro de Pago</h2>
-        <p className="text-slate-500 font-medium">Los datos se guardarán exclusivamente en la hoja OficinaVirtual.</p>
+        <p className="text-slate-500 font-medium italic">Destino: Hoja 'OficinaVirtual'</p>
       </header>
 
       {error && (
@@ -112,7 +113,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
 
           <div className="space-y-1.5">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Cédula del Representante</label>
-            <input type="text" readOnly value={formData.cedulaRepresen} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-4 text-sm font-bold text-slate-500 outline-none" />
+            <input type="text" readOnly value={formData.cedulaRepresentative} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-4 text-sm font-bold text-slate-500 outline-none" />
           </div>
 
           <div className="space-y-1.5">
@@ -180,7 +181,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ userCedula }) => {
           {loading ? (
             <>
               <Loader2 className="animate-spin" size={20} />
-              <span>Guardando en Oficina Virtual...</span>
+              <span>Conectando con Oficina Virtual...</span>
             </>
           ) : (
             <>
