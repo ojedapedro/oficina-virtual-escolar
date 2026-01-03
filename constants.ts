@@ -49,7 +49,7 @@ export const PAYMENT_TYPES = [
 /**
  * IMPORTANTE: El ID se extrajo de la nueva URL proporcionada por el usuario.
  */
-const DEPLOYMENT_ID = "AKfycbwky9W3hEK97ljVU5miw3mnsnbtuXy74uhI2zSfVUGEqXbWJkTwMhn_lA5yqw13oGdX"; 
+const DEPLOYMENT_ID = "AKfycbxfX-RgyFJop8nusgfHevx8aANDcxnRqiZ-73QehULfQ81VCRPMlgeWA26J8RQhNN2d"; 
 
 export const GOOGLE_SCRIPT_URL = `https://script.google.com/macros/s/${DEPLOYMENT_ID}/exec`;
 export const IS_CONFIGURED = true;
