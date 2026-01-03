@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { GOOGLE_SCRIPT_URL } from '../constants';
-import { Loader2, Calendar, RefreshCw, FileText, Bookmark, Clock, Target, Wallet, CheckCircle2, AlertCircle, Timer, User as UserIcon } from 'lucide-react';
+import { Loader2, Calendar, RefreshCw, FileText, AlertCircle, User as UserIcon } from 'lucide-react';
 
 interface PaymentRecord {
   id: string;
   timestamp: string;
   paymentDate: string;
-  cedulaRepresen: string;
+  cedulaRepresentative: string;
   matricula: string;
   level: string;
   method: string;
@@ -36,9 +36,9 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ userCedula }) => {
       const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=read`);
       const data = await response.json();
       if (Array.isArray(data)) {
-        // Filtramos por cedulaRepresen que es el nombre de la columna en OficinaVirtual
+        // Filtramos por cedulaRepresentative que es el nombre exacto de la columna en la nueva OficinaVirtual
         const filtered = data.filter((p: any) => 
-          p.cedulaRepresen?.toString().trim() === userCedula.trim()
+          p.cedulaRepresentative?.toString().trim() === userCedula.trim()
         );
         setPayments(filtered);
       }

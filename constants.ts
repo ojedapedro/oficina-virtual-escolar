@@ -47,11 +47,9 @@ export const PAYMENT_TYPES = [
 ];
 
 /**
- * IMPORTANTE: Si actualizaste el archivo google_script.js, 
- * DEBES generar una "Nueva Versión" en Implementar > Gestionar implementaciones
- * y asegurarte de que el ID aquí sea el de la última implementación.
+ * IMPORTANTE: El ID se extrajo de la nueva URL proporcionada por el usuario.
  */
-const DEPLOYMENT_ID = "https://script.google.com/macros/s/AKfycbyp8JpkPf35Qr56p5co6C_lyfKFdDu0rRpGd3S4bvlu3Dtb-y5InBn3yHxv4EQK7cLnnQ/exec"; 
+const DEPLOYMENT_ID = "AKfycbwky9W3hEK97ljVU5miw3mnsnbtuXy74uhI2zSfVUGEqXbWJkTwMhn_lA5yqw13oGdX"; 
 
 export const GOOGLE_SCRIPT_URL = `https://script.google.com/macros/s/${DEPLOYMENT_ID}/exec`;
 export const IS_CONFIGURED = true;
